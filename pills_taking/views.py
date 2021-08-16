@@ -10,15 +10,20 @@ class TakingListView(generics.ListAPIView):
     def get_queryset(self):
         return PillTaking.objects.filter(pill_course__owner=self.request.user)
 
-# # TODO: Все мои приёмы на сегодня
+#  Все мои приёмы на сегодня
 # [
 #     {
-#         "Название таблетки",
-#         "Описание курса",
+#         Время принятия
+#         Принят
+#         Course: {
+#               id
+#                "Название таблетки",
+#                "condition", dose, currency_name,
+#
+#         }
 #     }
 # ]
 #
-# # TODO: Активные курсы
 # [
 #     {
 #         "Название таблетки",

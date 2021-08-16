@@ -5,6 +5,10 @@ from django.contrib.auth.models import User
 from django.db.models import CASCADE
 
 
+def pill_form_icon_path(instance, filename):
+    return f'icons/{filename}'
+
+
 class PillTaking(models.Model):
     class Meta:
         verbose_name = 'Приём препарата'
@@ -13,6 +17,7 @@ class PillTaking(models.Model):
     pill_course = models.ForeignKey('PillCourse', on_delete=CASCADE, verbose_name='Курс')
     time_taking = models.TimeField(verbose_name='Время принятия')
     is_took = models.BooleanField(default=False, verbose_name='Принято')
+
     # time_took = models.TimeField(null=True, verbose_name='Действительное время принятия')
 
     def __str__(self):
@@ -25,6 +30,7 @@ class PillForm(models.Model):
         verbose_name_plural = 'Виды препаратов'
 
     name = models.CharField(max_length=50, verbose_name='Название формы препарата')
+    icon = models.FileField(upload_to=pill_form_icon_path, default='icons/default.png')
 
     def __str__(self):
         return self.name

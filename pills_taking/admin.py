@@ -9,7 +9,7 @@ class PillTakingAdmin(admin.ModelAdmin):
 
 @admin.register(PillForm)
 class PillFormAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'icon']
 
 
 @admin.register(PillCurrency)
