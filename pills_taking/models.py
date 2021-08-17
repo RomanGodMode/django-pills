@@ -75,8 +75,8 @@ class PillCourse(models.Model):
     owner = models.ForeignKey(User, on_delete=CASCADE, verbose_name='Владелец')
     pill_name = models.CharField(max_length=50, unique=True, verbose_name='Название препарата')
     description = models.CharField(max_length=50, verbose_name='Описание')
-    taking_condition = models.CharField(choices=TAKING_CONDITIONS_CHOICES, null=True, max_length=50,
-                                        verbose_name='Условие приёма')
+    taking_condition = models.PositiveIntegerField(choices=TAKING_CONDITIONS_CHOICES, null=True,
+                                                   verbose_name='Условие приёма')
 
     pill_form = models.ForeignKey(PillForm, on_delete=CASCADE, verbose_name='Вид препарата')
     pill_currency = models.ForeignKey(PillCurrency, on_delete=CASCADE, verbose_name='Единица измерения')

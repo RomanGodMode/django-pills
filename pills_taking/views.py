@@ -1,7 +1,7 @@
 from rest_framework import generics, viewsets
 
-from pills_taking.models import PillTaking
-from pills_taking.serializers import VkidListSerializer
+from pills_taking.models import PillTaking, PillCourse
+from pills_taking.serializers import VkidListSerializer, ActiveCoursesSerializer
 
 
 class TakingListView(generics.ListAPIView):
@@ -9,6 +9,13 @@ class TakingListView(generics.ListAPIView):
 
     def get_queryset(self):
         return PillTaking.objects.filter(pill_course__owner=self.request.user)
+
+
+class ActiveCoursesListView(generics.ListAPIView):
+    serializer_class = ActiveCoursesSerializer
+
+    def get_queryset(self):
+        return PillCourse.objects.filter(owner=self.request.user)
 
 #  Все мои приёмы на сегодня
 # [
