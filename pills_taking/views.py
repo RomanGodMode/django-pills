@@ -1,7 +1,10 @@
-from rest_framework import generics, viewsets
+from datetime import datetime
+
+from rest_framework import generics, viewsets, mixins
 
 from pills_taking.models import PillTaking, PillCourse
-from pills_taking.serializers import VkidListSerializer, ActiveCoursesSerializer
+from pills_taking.serializers import VkidListSerializer, ActiveCoursesSerializer, CompletedCoursesSerializer, \
+    DetailCourseSerializer
 
 
 class TakingListView(generics.ListAPIView):
@@ -15,9 +18,23 @@ class ActiveCoursesListView(generics.ListAPIView):
     serializer_class = ActiveCoursesSerializer
 
     def get_queryset(self):
+        return PillCourse.objects.filter(owner=self.request.user, date_end__gte=datetime.now())
+
+
+class CompletedCoursesListView(generics.ListAPIView):
+    serializer_class = CompletedCoursesSerializer
+
+    def get_queryset(self):
+        return PillCourse.objects.filter(owner=self.request.user, date_end__lt=datetime.now())
+
+
+class DetailCourseView(generics.RetrieveAPIView, generics.UpdateAPIView):
+    serializer_class = DetailCourseSerializer
+
+    def get_queryset(self):
         return PillCourse.objects.filter(owner=self.request.user)
 
-#  Все мои приёмы на сегодня
+# Все мои приёмы на сегодня
 # [
 #     {
 #         Время принятия
@@ -42,12 +59,13 @@ class ActiveCoursesListView(generics.ListAPIView):
 #         "Кол-во приёмов",
 #     }
 # ]
-# # TODO: Завершённые курсы
+#
 # [
 #     {
 #         "Название таблетки",
 #         "дата начала",
-#         "дата конца",#
+#         "дата конца",
+#         "Форма"
 #     }
 # ]
 # # TODO: Формочка курса

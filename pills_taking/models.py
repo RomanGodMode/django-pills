@@ -81,11 +81,12 @@ class PillCourse(models.Model):
     pill_form = models.ForeignKey(PillForm, on_delete=CASCADE, verbose_name='Вид препарата')
     pill_currency = models.ForeignKey(PillCurrency, on_delete=CASCADE, verbose_name='Единица измерения')
     single_dose = models.IntegerField(verbose_name='Разовая доза')
-    taking_interval = models.ForeignKey(TakingIntervalType, on_delete=CASCADE, verbose_name='Интервал принятия')
+    taking_interval = models.ForeignKey(TakingIntervalType, null=True, blank=True, on_delete=CASCADE,
+                                        verbose_name='Интервал принятия')
 
     days_count = models.PositiveIntegerField(verbose_name='Кол-во дней в курсе')
     date_start = models.DateField(verbose_name='Дата начала')
-    date_end = models.DateField(verbose_name='Дата конца', default=None, null=True, editable=False)
+    date_end = models.DateField(verbose_name='Дата конца', blank=True, editable=False)
 
     def save(self, *args, **kwargs):
         self.date_end = self.date_start + timedelta(days=self.days_count)
@@ -93,3 +94,12 @@ class PillCourse(models.Model):
 
     def __str__(self):
         return f'{self.owner.username} ({self.pill_name})'
+
+
+class CustomIntervalTypeBinding(models.Model):
+    class Meta:
+        verbose_name = 'Привязка самопального интервала'
+        verbose_name_plural = 'Месево из самопальных интервалов'
+
+    pill_course = models.ForeignKey(PillCourse, on_delete=CASCADE, verbose_name='Курс')
+    days_skip = models.PositiveIntegerField(verbose_name='Пропустить дней')

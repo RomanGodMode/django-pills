@@ -28,3 +28,8 @@ class PillCourseAdmin(admin.ModelAdmin):
 @admin.register(TakingIntervalType)
 class TakingIntervalTypeAdmin(admin.ModelAdmin):
     list_display = ['title', 'day_skip']
+
+
+@admin.register(CustomIntervalTypeBinding)
+class CustomIntervalTypeBindingAdmin(admin.ModelAdmin):
+    list_display = ['id', 'pill_course', 'days_skip']
