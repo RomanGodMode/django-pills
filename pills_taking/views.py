@@ -1,11 +1,12 @@
 from datetime import datetime
 
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 
-from pills_taking.models import PillTaking, PillCourse
+from pills_taking.models import PillTaking, PillCourse, PillForm, PillCurrency
 from pills_taking.serializers import VkidListSerializer, ActiveCoursesSerializer, CompletedCoursesSerializer, \
-    DetailCourseSerializer, CreateCourseSerializer
+    DetailCourseSerializer, CreateCourseSerializer, PillFormSerializer, CurrencySerializer
 
 
 class TakingListView(generics.ListAPIView):
@@ -44,6 +45,14 @@ class CreateCourseView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CreateCourseSerializer
 
-# Действия
-# Круд Курса
-# Цеплять приёмы к курсу
+
+class PillFormViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PillForm.objects.all()
+    serializer_class = PillFormSerializer
+
+
+class PillCurrencyViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PillCurrency.objects.all()
+    serializer_class = CurrencySerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_fields = ['pill_form']
