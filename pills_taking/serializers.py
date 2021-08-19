@@ -3,7 +3,8 @@ from math import ceil
 
 from rest_framework import serializers
 
-from pills_taking.models import PillTaking, PillCourse, PillForm, PillCurrency, TakingIntervalType
+from pills_taking.models import PillTaking, PillCourse, PillForm, PillCurrency, TakingIntervalType, \
+    CustomIntervalTypeBinding
 from pills_taking.service.get_taking_days_count import get_taking_days_count, get_passed_days_count
 
 
@@ -94,3 +95,43 @@ class DetailCourseSerializer(serializers.ModelSerializer):
             'date_start', 'days_count', 'single_dose',
             'pill_form', 'pill_currency', 'taking_interval'
         ]
+
+
+class CustomIntervalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomIntervalTypeBinding
+        fields = ['days_skip']
+
+
+class CreateCourseSerializer(serializers.ModelSerializer):
+    # interval_binds = serializers.ListField(child=serializers.IntegerField(), default=None)
+    # interval_binds = serializers.ListField(child=serializers.IntegerField(), default=None)
+    interval_binds = CustomIntervalSerializer(many=True, default=None)
+
+    class Meta:
+        model = PillCourse
+        fields = [
+            'pill_name', 'description', 'taking_condition', 'date_start', 'days_count', 'single_dose',
+            'pill_form', 'pill_currency', 'taking_interval', 'interval_binds'
+        ]
+
+    def validate(self, attrs):
+        if not attrs['interval_binds'] and not attrs.get('taking_interval', None):
+            raise serializers.ValidationError("Должен быть выбран хоть какой-то интервал")
+        if attrs['interval_binds'] and attrs.get('taking_interval', None):
+            raise serializers.ValidationError("Нельзя выбрать 2 типа выбора интервала")
+
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        custom_interval_binds = validated_data.pop('interval_binds')
+
+        course = PillCourse.objects.create(**validated_data, owner=self.context['request'].user)
+
+        if custom_interval_binds:
+            course.interval_binds.set([
+                CustomIntervalTypeBinding.objects.create(pill_course=course, days_skip=interval['days_skip'])
+                for interval in custom_interval_binds
+            ])
+
+        return course

@@ -101,5 +101,5 @@ class CustomIntervalTypeBinding(models.Model):
         verbose_name = 'Привязка самопального интервала'
         verbose_name_plural = 'Месево из самопальных интервалов'
 
-    pill_course = models.ForeignKey(PillCourse, on_delete=CASCADE, verbose_name='Курс')
+    pill_course = models.ForeignKey(PillCourse, on_delete=CASCADE, related_name='interval_binds', verbose_name='Курс')
     days_skip = models.PositiveIntegerField(verbose_name='Пропустить дней')

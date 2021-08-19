@@ -1,13 +1,15 @@
 from datetime import datetime
 
 from rest_framework import generics, viewsets, mixins
+from rest_framework.permissions import IsAuthenticated
 
 from pills_taking.models import PillTaking, PillCourse
 from pills_taking.serializers import VkidListSerializer, ActiveCoursesSerializer, CompletedCoursesSerializer, \
-    DetailCourseSerializer
+    DetailCourseSerializer, CreateCourseSerializer
 
 
 class TakingListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = VkidListSerializer
 
     def get_queryset(self):
@@ -15,6 +17,7 @@ class TakingListView(generics.ListAPIView):
 
 
 class ActiveCoursesListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = ActiveCoursesSerializer
 
     def get_queryset(self):
@@ -22,6 +25,7 @@ class ActiveCoursesListView(generics.ListAPIView):
 
 
 class CompletedCoursesListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = CompletedCoursesSerializer
 
     def get_queryset(self):
@@ -29,52 +33,16 @@ class CompletedCoursesListView(generics.ListAPIView):
 
 
 class DetailCourseView(generics.RetrieveAPIView, generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = DetailCourseSerializer
 
     def get_queryset(self):
         return PillCourse.objects.filter(owner=self.request.user)
 
-# Все мои приёмы на сегодня
-# [
-#     {
-#         Время принятия
-#         Принят
-#         Course: {
-#               id
-#                "Название таблетки",
-#                "condition", dose, currency_name,
-#
-#         }
-#     }
-# ]
-#
-# [
-#     {
-#         "Название таблетки",
-#         "дата начала",
-#         "дата конца",
-#         "пройденное Кол-во дней",
-#         "Кол-во дней",
-#         "пройденное Кол-во приёмов",
-#         "Кол-во приёмов",
-#     }
-# ]
-#
-# [
-#     {
-#         "Название таблетки",
-#         "дата начала",
-#         "дата конца",
-#         "Форма"
-#     }
-# ]
-# # TODO: Формочка курса
-#
-#     {
-#         Всё
-#         Тип
-#         Куренси { Время которое нада }
-#     }
+
+class CreateCourseView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CreateCourseSerializer
 
 # Действия
 # Круд Курса
