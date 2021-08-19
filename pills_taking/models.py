@@ -14,7 +14,7 @@ class PillTaking(models.Model):
         verbose_name = 'Приём препарата'
         verbose_name_plural = 'Приёмы препаратов'
 
-    pill_course = models.ForeignKey('PillCourse', on_delete=CASCADE, verbose_name='Курс')
+    pill_course = models.ForeignKey('PillCourse', related_name='takings', on_delete=CASCADE, verbose_name='Курс')
     time_taking = models.TimeField(verbose_name='Время принятия')
     is_took = models.BooleanField(default=False, verbose_name='Принято')
 

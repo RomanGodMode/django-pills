@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from pills_taking.models import PillTaking, PillCourse, PillForm, PillCurrency
 from pills_taking.serializers import VkidListSerializer, ActiveCoursesSerializer, CompletedCoursesSerializer, \
-    DetailCourseSerializer, CreateCourseSerializer, PillFormSerializer, CurrencySerializer
+    DetailCourseSerializer, CreateCourseSerializer, PillFormSerializer, CurrencySerializer, UpdateCourseSerializer
 
 
 class TakingListView(generics.ListAPIView):
@@ -44,6 +44,14 @@ class DetailCourseView(generics.RetrieveAPIView, generics.UpdateAPIView):
 class CreateCourseView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CreateCourseSerializer
+
+
+class UpdateCourseView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateCourseSerializer
+
+    def get_queryset(self):
+        return PillCourse.objects.filter(owner=self.request.user)
 
 
 class PillFormViewSet(viewsets.ReadOnlyModelViewSet):

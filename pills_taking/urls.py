@@ -13,5 +13,6 @@ urlpatterns = [
     path('completed-courses/', CompletedCoursesListView.as_view()),
     path('courses/<int:pk>/', DetailCourseView.as_view()),
     path('courses/create/', CreateCourseView.as_view()),
+    path('courses/update/<int:pk>/', UpdateCourseView.as_view()),
     path('', include(router.urls))
 ]

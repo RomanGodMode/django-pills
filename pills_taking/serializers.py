@@ -103,16 +103,21 @@ class CustomIntervalSerializer(serializers.ModelSerializer):
         fields = ['days_skip']
 
 
+class PillTakingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PillTaking
+        fields = ['time_taking']
+
+
 class CreateCourseSerializer(serializers.ModelSerializer):
-    # interval_binds = serializers.ListField(child=serializers.IntegerField(), default=None)
-    # interval_binds = serializers.ListField(child=serializers.IntegerField(), default=None)
     interval_binds = CustomIntervalSerializer(many=True, default=None)
+    takings = PillTakingSerializer(many=True)
 
     class Meta:
         model = PillCourse
         fields = [
             'pill_name', 'description', 'taking_condition', 'date_start', 'days_count', 'single_dose',
-            'pill_form', 'pill_currency', 'taking_interval', 'interval_binds'
+            'pill_form', 'pill_currency', 'taking_interval', 'interval_binds', 'takings'
         ]
 
     def validate(self, attrs):
@@ -125,13 +130,53 @@ class CreateCourseSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         custom_interval_binds = validated_data.pop('interval_binds')
+        takings = validated_data.pop('takings')
 
         course = PillCourse.objects.create(**validated_data, owner=self.context['request'].user)
 
+        for taking in takings:
+            PillTaking.objects.create(**taking, pill_course=course)
+
         if custom_interval_binds:
-            course.interval_binds.set([
+            for interval in custom_interval_binds:
                 CustomIntervalTypeBinding.objects.create(pill_course=course, days_skip=interval['days_skip'])
-                for interval in custom_interval_binds
-            ])
 
         return course
+
+
+class UpdateCourseSerializer(serializers.ModelSerializer):
+    interval_binds = CustomIntervalSerializer(many=True, default=None)
+    takings = PillTakingSerializer(many=True)
+
+    class Meta:
+        model = PillCourse
+        fields = [
+            'pill_name', 'description', 'taking_condition', 'date_start', 'days_count', 'single_dose',
+            'pill_form', 'pill_currency', 'taking_interval', 'interval_binds', 'takings'
+        ]
+
+    def validate(self, attrs):
+        if not attrs['interval_binds'] and not attrs.get('taking_interval', None):
+            raise serializers.ValidationError("Должен быть выбран хоть какой-то интервал")
+        if attrs['interval_binds'] and attrs.get('taking_interval', None):
+            raise serializers.ValidationError("Нельзя выбрать 2 типа выбора интервала")
+
+        return super().validate(attrs)
+
+    def update(self, instance: PillCourse, validated_data):
+        custom_interval_binds = validated_data.pop('interval_binds')
+        takings = validated_data.pop('takings')
+
+        PillCourse.objects.filter(id=instance.id).update(**validated_data)
+        instance.refresh_from_db()
+
+        PillTaking.objects.filter(pill_course=instance).delete()
+        for taking in takings:
+            PillTaking.objects.create(**taking, pill_course=instance)
+
+        if custom_interval_binds:
+            CustomIntervalTypeBinding.objects.filter(pill_course=instance).delete()
+            for interval in custom_interval_binds:
+                CustomIntervalTypeBinding.objects.create(pill_course=instance, days_skip=interval['days_skip'])
+
+        return instance
